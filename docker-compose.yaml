@@ -1,10 +1,34 @@
 services:
   nuxt:
     image: 'node:21-alpine3.18'
+    working_dir: /app
     ports:
       - 3000:3000
       - 24678:24678
     volumes:
       - ./nuxt:/app
-    working_dir: /app
     command: npm run dev -- -o
+
+  symfony:
+    image: php:8.3.7RC1-zts-alpine3.19
+    working_dir: /app
+    ports:
+      - 8000:8000
+    volumes:
+      - ./symfony:/app
+    build: path
+    # command: tail -F anything
+    command: >
+      sh -c "apk add --no-cache bash &&
+             curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.alpine.sh' | bash &&
+             apk add symfony-cli &&
+             symfony server:start"
+    depends_on:
+      - composer
+  
+  composer:
+    image: composer:2.7.4
+    working_dir: /app
+    volumes:
+      - ./symfony:/app
+    command: tail -F anything
