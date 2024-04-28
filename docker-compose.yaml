@@ -5,6 +5,8 @@ services:
     ports:
       - 3000:3000
       - 24678:24678
+    networks:
+      - app
     volumes:
       - ./nuxt:/app
     command: npm run dev -- -o
@@ -14,13 +16,16 @@ services:
     working_dir: /app
     ports:
       - 8000:8000
+    networks:
+      - app
     volumes:
       - ./symfony:/app
-    build: path
     command: >
       sh -c "apk add --no-cache bash &&
              curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.alpine.sh' | bash &&
              apk add symfony-cli &&
+             apk add --no-cache postgresql-dev &&
+             docker-php-ext-install pdo pdo_pgsql &&
              symfony server:start"
     depends_on:
       - composer
@@ -43,7 +48,7 @@ services:
     ports:
       - '5432:5432'
     networks:
-      - postgres
+      - app
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -56,12 +61,12 @@ services:
     ports:
       - "8888:80"
     networks:
-      - postgres
+      - app
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
 networks:
-  postgres:
+  app:
     driver: bridge
     
 volumes:
