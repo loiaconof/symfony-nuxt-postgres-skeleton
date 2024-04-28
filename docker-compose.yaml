@@ -36,7 +36,9 @@ services:
     working_dir: /app
     volumes:
       - ./symfony:/app
-    command: tail -F anything
+    command: >
+      sh -c "composer install &&
+             tail -F anything"
     
   postgres:
     image: 'postgres:15.5-alpine3.18'
