@@ -17,7 +17,6 @@ services:
     volumes:
       - ./symfony:/app
     build: path
-    # command: tail -F anything
     command: >
       sh -c "apk add --no-cache bash &&
              curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.alpine.sh' | bash &&
@@ -25,6 +24,7 @@ services:
              symfony server:start"
     depends_on:
       - composer
+      - postgres
   
   composer:
     image: composer:2.7.4
@@ -32,3 +32,38 @@ services:
     volumes:
       - ./symfony:/app
     command: tail -F anything
+    
+  postgres:
+    image: 'postgres:15.5-alpine3.18'
+    restart: always
+    environment:
+      - POSTGRES_DB=app
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD=!ChangeMe!
+    ports:
+      - '5432:5432'
+    networks:
+      - postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pg-admin:
+    image: dpage/pgadmin4:8.5
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@email.com
+      - PGADMIN_DEFAULT_PASSWORD=adminpassword
+    ports:
+      - "8888:80"
+    networks:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+networks:
+  postgres:
+    driver: bridge
+    
+volumes:
+  postgres_data:
+  pgadmin_data:
