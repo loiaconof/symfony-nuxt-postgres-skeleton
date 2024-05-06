@@ -1,3 +1,5 @@
+version: '3'
+
 services:
   nuxt:
     image: 'node:21-alpine3.18'
@@ -70,6 +72,16 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
+  docs:
+    image: 'node:21-alpine3.18'
+    working_dir: /app
+    ports:
+      - 5173:5173
+    volumes:
+      - ./docs:/app
+    command: >
+      sh -c "npm i && npm run docs:dev"
+    
 networks:
   webapp:
     driver: bridge
